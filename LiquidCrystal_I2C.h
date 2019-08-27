@@ -75,6 +75,8 @@ public:
 	 */
 	void begin();
 
+	void loop();
+
 	 /**
 	  * Remove all the characters currently shown. Next print/write operation will start
 	  * from the first position on LCD display.
@@ -119,6 +121,8 @@ public:
 	 */
 	void cursor();
 
+	bool isReady();
+
 	void scrollDisplayLeft();
 	void scrollDisplayRight();
 	void printLeft();
@@ -160,6 +164,12 @@ private:
 	uint8_t _rows;
 	uint8_t _charsize;
 	uint8_t _backlightval;
+
+	void resetDefaults();
+	void expanderReset();
+	bool _begun = false;
+	uint32_t _expanderReset = 0;
+	bool _ready = false;
 };
 
 #endif // FDB_LIQUID_CRYSTAL_I2C_H
