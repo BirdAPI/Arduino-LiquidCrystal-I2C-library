@@ -67,6 +67,10 @@ void LiquidCrystal_I2C::begin() {
 		_displayfunction |= LCD_5x10DOTS;
 	}
 
+	if (millis() > 50) {
+		expanderReset();
+	}
+
 	_begun = true;
 }
 
