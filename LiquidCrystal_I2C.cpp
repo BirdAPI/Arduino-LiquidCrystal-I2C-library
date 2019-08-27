@@ -31,6 +31,29 @@ LiquidCrystal_I2C::LiquidCrystal_I2C(uint8_t lcd_addr, uint8_t lcd_cols, uint8_t
 	_backlightval = LCD_BACKLIGHT;
 }
 
+void LiquidCrystal_I2C::loop() {
+	if (!_begun) { begin(); }
+
+	if (_expanderReset == 0) {
+		if (millis() < 50) { return; }
+
+		expanderReset();
+		return;
+	}
+
+	if (!_ready) {
+		// We need to wait at least 1000 millis for it to be ready for commands
+		if (millis() - _expanderReset > 1000) {
+			resetDefaults();
+			_ready = true;
+		}
+	}
+}
+
+bool LiquidCrystal_I2C::isReady() {
+	return _ready;
+}
+
 void LiquidCrystal_I2C::begin() {
 	Wire.begin();
 	_displayfunction = LCD_4BITMODE | LCD_1LINE | LCD_5x8DOTS;
@@ -44,15 +67,16 @@ void LiquidCrystal_I2C::begin() {
 		_displayfunction |= LCD_5x10DOTS;
 	}
 
-	// SEE PAGE 45/46 FOR INITIALIZATION SPECIFICATION!
-	// according to datasheet, we need at least 40ms after power rises above 2.7V
-	// before sending commands. Arduino can turn on way befer 4.5V so we'll wait 50
-	delay(50);
+	_begun = true;
+}
 
+void LiquidCrystal_I2C::expanderReset() {
 	// Now we pull both RS and R/W low to begin commands
-	expanderWrite(_backlightval);	// reset expanderand turn backlight off (Bit 8 =1)
-	delay(1000);
+	expanderWrite(_backlightval);	// reset expander and turn backlight off (Bit 8 =1)
+	_expanderReset = millis();
+}
 
+void LiquidCrystal_I2C::resetDefaults() {
 	//put the LCD into 4 bit mode
 	// this is according to the hitachi HD44780 datasheet
 	// figure 24, pg 46
